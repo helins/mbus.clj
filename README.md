@@ -10,7 +10,7 @@ Supports a (very) wide variety of platforms.
 ## Usage
 
 This library needs [jRxTx](https://github.com/openmuc/jrxtx) for using serial
-ports. For instructins, refer to [Clotty](https://github.com/dvlopt/clotty), our
+ports. For instructions, refer to [Clotty](https://github.com/dvlopt/clotty), our
 own clojure wrapper.
 
 Then :
@@ -51,5 +51,4 @@ the relevant hardware to test it.
 
 Copyright © 2017 Adam Helinski
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the Mozilla Public License version 2.0.
