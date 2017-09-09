@@ -6,14 +6,17 @@ devices.
 
 Supports a (very) wide variety of platforms.
 
-
-## Usage
+## Installation
 
 This library needs [jRxTx](https://github.com/openmuc/jrxtx) for using serial
 ports. For instructions, refer to [Clotty](https://github.com/dvlopt/clotty), our
 own clojure wrapper.
 
-Then :
+Then, simply add the following dependency to your project :
+
+    [dvlopt/clombus "0.0.0-alpha0"]
+
+## Usage
 
 ```clj
 (require '[clombus.wired   :as mbus.wired]
