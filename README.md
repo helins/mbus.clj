@@ -14,41 +14,33 @@ own clojure wrapper.
 
 Then, simply add the following dependency to your project :
 
-    [dvlopt/clombus "0.0.0-alpha0"]
+    [dvlopt/clombus "0.0.0-alpha1"]
 
 ## Usage
 
+Read the full [API](https://dvlopt.github.io/doc/clombus/index.html).
+
 ```clj
-(require '[clombus.wired   :as mbus.wired]
-         '[clombus.structs :as mbus.structs])
+(require '[clombus.wired :as mbus.wired])
 
 
 ;; create an access point
-(def ap
+(def access-point
      (mbus.wired/open "/dev/ttyUSB0"
                       {:baud-rate 2400
                        :timeout   1000}))
 
 
 ;; request user data from slave 0
-(def variable-data-structure
-     (mbus.wired/req-ud2 ap
-                         0))
-
-
-;; get data records from the variable data structure
-;; and convert them to nice clojure maps
-(map mbus.structs/to-map
-     (mbus.structs/records variable-data-structures))
+(mbus.wired/req-ud2 access-point
+                    0)
 ```
-
-Read the full [API](https://dvlopt.github.io/doc/clombus/index.html).
 
 ## Status
 
 If you need wireless M-Bus, you need to interop with
-[JMbus](https://www.openmuc.org/m-bus/). We will a wrapper as soon as we have
-the relevant hardware to test it.
+[JMbus](https://www.openmuc.org/m-bus/). We will write a wrapper as soon as we
+have the relevant hardware to test it.
 
 ## License
 

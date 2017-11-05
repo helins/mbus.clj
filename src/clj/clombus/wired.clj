@@ -1,9 +1,10 @@
 (ns clombus.wired
 
-  "Wired meter-bus through serial ports"
+  "Wired meter-bus through serial ports."
 
   {:author "Adam Helinski"}
 
+  (:require [clombus.interop :as $.interop])
   (:import java.io.IOException
            org.openmuc.jrxtx.SerialPortTimeoutException
            (org.openmuc.jmbus MBusSap
@@ -12,137 +13,14 @@
 
 
 
-;;;;;;;;;;
-
-
-(defprotocol IWrapper
-
-  "Extend a MBusSap object (meter-bus service access point)"
-
-  (raw [this]
-
-    "Get the raw MBusSap object")
-
-
-  (select [this secondary-address]
-
-    "Select a slave using its secondary address.
-
-     The secondary address might be a hex string or SecondaryAddress object.
-
-     This slave will then be accessible using primary address 0xfd.
-
-     Returns ::success  if the operation is successful
-             ::timeout  if the slave did not answer within the timeout
-             ::closed   if the access point is closed
-
-     Throws an IOException is something goes wrong.
-    
-     Cf. `structs/secondary-address`")
-
-
-  (selected [this]
-
-    "Get the selected secondary address if there is one.
-
-     Cf. `select`")
-
-
-  (deselect [this]
-
-    "Deselect a slave using its secondary address.
-
-     Returns ::success  if the operation is successful
-             ::timeout  if the slave did not answer within the timeout
-             ::closed   if the access point is closed
-    
-     Throws an IOException if something goes wrong.
-    
-     Cf. `select`")
-
-
-  (req-ud2 [this]
-           [this primary-address]
-
-    "Request user data from the slave and wait for its answer.
-
-     Default address is 0xfd, the placeholder for selected slaves.
-
-     Returns a variable data structure  if the operation is successful
-             ::timeout                  if the slave did not answer within the timeout
-             ::closed                   if the access point is closed
-
-     Throws an IOException if something goes wrong.
-
-     Cf. `select`")
-
-  
-  (snd-nke [this]
-           [this primary-address]
-
-    "Send a SND_NKE message to reset the FCB (frame counter bit).
-
-     Default address is 0xfd, the placeholder for selected slaves.
-
-     Returns ::success  if the operation is successful
-             ::timeout  if the slave did not answer with a 0xe5 message within
-                        the timeout
-             ::closed   if the access point is closed
-
-     Throws an IOException if something goes wrong.
-    
-     Cf. `selected`")
-
-
-  (snd-ud [this ba]
-          [this primary-address ba]
-
-    "Send user data to a slave.
-
-     Default address is 0xfd, the placeholder for selected slaves.
-    
-     Returns ::success  if the write is successful
-             ::fail     if the write failed
-             ::timeout  if the slave did not answer within the timeout
-             ::closed   if the access point is closed
-    
-     Throws an IOException if something goes wrong.
-    
-     Cf. `selected`")
-
-
-  (reset-application [this]
-                     [this primary-address]
-
-    "Send an application reset to the requested slave.
-
-     Default address is 0xfd, the placeholder for selected slaves.
-
-     Returns ::success  if the operation is successful
-             ::timeout  if the slave did not answer with a 0xe5 message within
-                        the timeout
-             ::closed   if the access point is closed
-
-     Throws an IOException if something goes wrong.
-    
-     Cf. `selected`")
-
-
-  (closed? [this]
-
-    "Is this meter-bus access point closed ?")
-
-
-  (close [this]
-
-    "Close the access point"))
-
-
+;;;;;;;;;; Private
 
 
 (defmacro ^:private -try
 
-  "Helper for IWrapper fns"
+  "Helper for IWrapper fns.
+  
+   Wraps forms in order to catch timeout and certain io exceptions."
 
   [& body]
 
@@ -158,15 +36,232 @@
 
 
 
-(deftype Wrapper [^MBusSap access-point
-                  *closed?
-                  *secondary-address]
+;;;;;;;;;; API
+
+
+(defprotocol IWrapper
+
+  "Handles with wired M-Bus slaves."
+
+
+  (raw [access-point]
+
+    "Gets the raw org.openmuc.jmbus.MBusSap object.")
+
+
+  (status [access-point]
+
+    "Gets the current status of the access point.")
+
+
+  (select [access-point secondary-address]
+
+    "Selects a slave using its secondary address (given as a hex string).
+
+     This slave will then be accessible using primary address 0xfd.
+
+
+     Returns
+    
+       ::success
+         If the operation is successful.
+       
+       ::timeout
+         If the slave did not answer within the timeout.
+             
+       ::closed
+         If the access point is closed.
+
+
+     Throws
+    
+       java.io.IOException
+         If something goes wrong.")
+
+
+  (selected [access-point]
+
+    "Gets the selected secondary address if there is one.
+
+     Cf. `select`")
+
+
+  (deselect [access-point]
+
+    "Deselects a slave.
+
+
+     Returns
+    
+       ::success
+         If the operation is successful.
+       
+       ::timeout
+         If the slave did not answer within the timeout.
+             
+       ::closed
+         If the access point is closed.
+
+
+     Throws
+    
+       java.io.IOException
+         If something goes wrong.
+    
+
+     Cf. `select`")
+
+
+  (req-ud2 [access-point]
+           [access-point primary-address]
+
+    "Requests user data from the slave and waits for its answer.
+
+     Default address is 0xfd, the placeholder for selected slaves.
+
+
+     Returns
+    
+       variable data structure
+         Response from the slave, map of various data.
+         Cf. `clombus.interop/variable-data-structure`
+       
+       ::timeout
+         If the slave did not answer within the timeout.
+             
+       ::closed
+         If the access point is closed.
+
+
+     Throws
+    
+       java.io.IOException
+         If something goes wrong.
+
+
+     Cf. `select`")
+
+  
+  (snd-nke [access-point]
+           [access-point primary-address]
+
+    "Sends a SND_NKE message to reset the FCB (frame counter bit).
+
+     Default address is 0xfd, the placeholder for selected slaves.
+  
+
+     Returns
+    
+       ::success
+         If the operation is successful.
+       
+       ::timeout
+         If the slave did not answer with a 0xe5 message within the timeout.
+             
+       ::closed
+         If the access point is closed.
+
+
+     Throws
+    
+       java.io.IOException
+         If something goes wrong.
+
+    
+     Cf. `selected`")
+
+
+  (snd-ud [access-point ba]
+          [access-point primary-address ba]
+
+    "Sends user data to a slave.
+
+     Default address is 0xfd, the placeholder for selected slaves.
+    
+
+     Returns
+    
+       ::success
+         If the operation is successful.
+
+       ::fail
+         If the write failed.
+       
+       ::timeout
+         If the slave did not answer within the timeout.
+             
+       ::closed
+         If the access point is closed.
+
+
+     Throws
+    
+       java.io.IOException
+         If something goes wrong.
+
+    
+     Cf. `selected`")
+
+
+  (reset-application [access-point]
+                     [access-point primary-address]
+
+    "Sends an application reset to the requested slave.
+
+     Default address is 0xfd, the placeholder for selected slaves.
+
+
+     Returns
+    
+       ::success
+         If the operation is successful.
+       
+       ::timeout
+         If the slave did not answer with a 0xe5 message within the timeout.
+             
+       ::closed
+         If the access point is closed.
+
+
+     Throws
+    
+       java.io.IOException
+         If something goes wrong.
+
+    
+     Cf. `selected`")
+
+
+  (closed? [access-point]
+
+    "Is this meter-bus access point closed ?")
+
+
+  (close [access-point]
+
+    "Closes the access point"))
+
+
+
+
+(deftype Wrapper [^MBusSap           access-point
+                                     baud-rate
+                                     timeout-ms
+                  ^:volatile-mutable -closed?
+                  ^:volatile-mutable -secondary-address]
 
   IWrapper
 
 
     (raw [_]
       access-point)
+
+    
+    (status [_]
+      {:baud-rate         baud-rate
+       :timeout-ms        timeout-ms
+       :closed?           -closed?
+       :secondary-address -secondary-address})
 
 
     (select [_ secondary-address]
@@ -176,31 +271,42 @@
                                    secondary-address)]
         (.selectComponent access-point
                           secondary-address')
-        (reset! *secondary-address
-                secondary-address')
+        (set! -secondary-address
+              secondary-address')
         ::success)))
 
 
     (selected [_]
-      @*secondary-address)
+      -secondary-address)
 
 
     (deselect [_]
       (-try
         (.deselectComponent access-point)
-        (reset! *secondary-address
-                nil)
+        (set! -secondary-address
+              nil)
         ::success))
 
 
+    (req-ud2 [access-point]
+      (req-ud2 access-point
+               0xfd))
+
+
     (req-ud2 [_ primary-address]
-      (-try
-        (.read access-point
-               primary-address)))
+      (let [res (-try
+                  (.read access-point
+                         primary-address))]
+        (if (or (identical? res
+                            ::closed)
+                (identical? res
+                            ::timeout))
+          res
+          ($.interop/variable-data-structure res))))
 
 
-    (req-ud2 [this]
-      (req-ud2 this
+    (snd-nke [access-point]
+      (snd-nke access-point
                0xfd))
 
 
@@ -211,9 +317,9 @@
         ::success))
 
 
-    (snd-nke [this]
-      (snd-nke this
-               0xfd))
+    (snd-ud [access-point ba]
+      (snd-ud access-point
+              0xfd))
 
 
     (snd-ud [_ primary-address ba]
@@ -225,9 +331,9 @@
           ::fail)))
 
 
-    (snd-ud [this ba]
-      (snd-ud this
-              0xfd))
+    (reset-application [access-point]
+      (reset-application access-point
+                         0xfd))
 
 
     (reset-application [_ primary-address]
@@ -237,19 +343,14 @@
         ::success))
 
 
-    (reset-application [this]
-      (reset-application this
-                         0xfd))
-
-
     (closed? [_]
-      @*closed?)
+      -closed?)
 
 
     (close [_]
       (.close access-point)
-      (reset! *closed?
-              true)
+      (set! -closed?
+            true)
       nil))
 
 
@@ -260,31 +361,43 @@
 
 (defn open
 
-  "Open a meter-bus access point on the given path to the serial port.
+  "Opens an M-Buss access point on the given path to the serial port.
 
-   The configuration map may contains :
+   The configuration map may contain :
 
        :baud-rate
-         A preferably standard baud rate
+         A preferably standard baud rate.
 
        :timeout
-         How many milliseconds it must wait for a slave answer before giving up
+         How many milliseconds it must wait for a slave answer before giving up.
 
-   Throws an IOException if something goes wrong."
+
+   Throws
+  
+     java.io.IOException
+       If something goes wrong."
 
   ^MBusSap
 
-  [path & [{:as   config
-            :keys [baud-rate
-                   timeout]
-            :or   {baud-rate 2400
-                   timeout   500}}]]
+  ([path]
 
-  (let [access-point ^MBusSap (MBusSap. path
-                                        baud-rate)]
-    (.setTimeout access-point
-                 timeout)
-    (.open access-point)
-    (Wrapper. access-point
-              (atom false)
-              (atom nil))))
+   (open path
+         nil))
+
+
+  ([path {:as   ?config
+          :keys [baud-rate
+                 timeout]
+          :or   {baud-rate 2400
+                 timeout   500}}]
+ 
+   (let [access-point ^MBusSap (MBusSap. path
+                                         baud-rate)]
+     (.setTimeout access-point
+                  timeout)
+     (.open access-point)
+     (Wrapper. access-point
+               baud-rate
+               timeout
+               false
+               nil))))
