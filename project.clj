@@ -1,5 +1,5 @@
 (defproject dvlopt/clombus
-            "0.0.0-alpha1"
+            "0.0.0-alpha2"
 
   :description       "Clojure library for wired and wireless meter-bus"
   :url               "https://github.com/dvlopt/clombus"
@@ -10,13 +10,13 @@
   :source-paths      ["src/clj"]
   :java-source-paths ["src/java"]
   :dependencies      [[dvlopt/clotty "0.0.0-alpha1"]]
-  :profiles          {:dev     {:source-paths ["dev"]
-                                :main         user
-                                :dependencies [[org.clojure/clojure    "1.9.0-beta3"]
-                                               [org.clojure/test.check "0.10.0-alpha2"]
-                                               [criterium              "0.4.4"]]
-                                :plugins      [[venantius/ultra "0.5.1"]
-                                               [lein-codox      "0.10.3"]]
-                                :codox        {:output-path  "doc/auto"
-                                               :source-paths ["src/clj"]}
-                                :global-vars  {*warn-on-reflection* true}}})
+  :profiles          {:dev {:source-paths ["dev"]
+                            :main         user
+                            :dependencies [[org.clojure/clojure    "1.9.0-beta3"]
+                                           [org.clojure/test.check "0.10.0-alpha2"]
+                                           [criterium              "0.4.4"]]
+                            :plugins      [[venantius/ultra "0.5.1"]
+                                           [lein-codox      "0.10.3"]]
+                            :codox        {:output-path  "doc/auto"
+                                           :source-paths ["src/clj"]}
+                            :global-vars  {*warn-on-reflection* true}}})

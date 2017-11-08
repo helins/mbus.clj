@@ -170,90 +170,91 @@
        :unit-str
         String representation.}"
 
-  [^DlmsUnit du]
+  [^DlmsUnit ?du]
 
-  {:unit-str
-   (.getUnit du)
+  (when ?du
+    {:unit-str
+     (.getUnit ?du)
 
-   :unit
-   (condp identical?
-          du
-     DlmsUnit/YEAR                                              :year
-     DlmsUnit/MONTH                                             :month
-     DlmsUnit/WEEK                                              :week
-     DlmsUnit/DAY                                               :day
-     DlmsUnit/HOUR                                              :hour
-     DlmsUnit/MIN                                               :min
-     DlmsUnit/SECOND                                            :second
-     DlmsUnit/DEGREE                                            :degree
-     DlmsUnit/DEGREE_CELSIUS                                    :degree-celsius
-     DlmsUnit/CURRENCY                                          :currency
-     DlmsUnit/METRE                                             :meter
-     DlmsUnit/METRE_PER_SECOND                                  :meter-per-second
-     DlmsUnit/CUBIC_METRE                                       :cubic-meter
-     DlmsUnit/CUBIC_METRE_CORRECTED                             :cubic-meter-corrected
-     DlmsUnit/CUBIC_METRE_PER_HOUR                              :cubic-meter-per-hour
-     DlmsUnit/CUBIC_METRE_PER_HOUR_CORRECTED                    :cubic-meter-per-hour-corrected
-     DlmsUnit/CUBIC_METRE_PER_DAY                               :cubic-meter-per-day
-     DlmsUnit/CUBIC_METRE_PER_DAY_CORRECTED                     :cubic-meter-per-day-corrected
-     DlmsUnit/LITRE                                             :litre
-     DlmsUnit/KILOGRAM                                          :kilogram
-     DlmsUnit/NEWTON                                            :newton
-     DlmsUnit/NEWTONMETER                                       :newton-meter
-     DlmsUnit/PASCAL                                            :pascal
-     DlmsUnit/BAR                                               :bar
-     DlmsUnit/JOULE                                             :joule
-     DlmsUnit/JOULE_PER_HOUR                                    :joule-per-hour
-     DlmsUnit/WATT                                              :watt
-     DlmsUnit/VOLT_AMPERE                                       :volt-ampere
-     DlmsUnit/VAR                                               :var
-     DlmsUnit/WATT_HOUR                                         :watt-hour
-     DlmsUnit/VOLT_AMPERE_HOUR                                  :volt-ampere-hour
-     DlmsUnit/VAR_HOUR                                          :var-hour
-     DlmsUnit/AMPERE                                            :ampere
-     DlmsUnit/COULOMB                                           :coulomb
-     DlmsUnit/VOLT                                              :volt
-     DlmsUnit/VOLT_PER_METRE                                    :volt-per-meter
-     DlmsUnit/FARAD                                             :farad
-     DlmsUnit/OHM                                               :ohm
-     DlmsUnit/OHM_METRE                                         :ohm-meter
-     DlmsUnit/WEBER                                             :weber
-     DlmsUnit/TESLA                                             :tesla
-     DlmsUnit/AMPERE_PER_METRE                                  :ampere-per-meter
-     DlmsUnit/HENRY                                             :henry
-     DlmsUnit/HERTZ                                             :hertz
-     DlmsUnit/ACTIVE_ENERGY_METER_CONSTANT_OR_PULSE_VALUE       :active-energy-meter-constant-or-pulse-value
-     DlmsUnit/REACTIVE_ENERGY_METER_CONSTANT_OR_PULSE_VALUE     :reactive-energy-meter-constant-or-puslse-value
-     DlmsUnit/APPARENT_ENERGY_METER_CONSTANT_OR_PULSE_VALUE     :apparent-energy-meter-constant-or-pulse-value
-     DlmsUnit/VOLT_SQUARED_HOURS                                :volt-squared-hours
-     DlmsUnit/AMPERE_SQUARED_HOURS                              :ampere-squared-hours
-     DlmsUnit/KILOGRAM_PER_SECOND                               :kilogram-per-second
-     DlmsUnit/KELVIN                                            :kelvin
-     DlmsUnit/VOLT_SQUARED_HOUR_METER_CONSTANT_OR_PULSE_VALUE   :volt-squared-hour-meter-constant-or-pulse-value
-     DlmsUnit/AMPERE_SQUARED_HOUR_METER_CONSTANT_OR_PULSE_VALUE :ampere-squared-hour-meter-constant-or-pulse-value
-     DlmsUnit/METER_CONSTANT_OR_PULSE_VALUE                     :meter-constant-or-pulse-value
-     DlmsUnit/PERCENTAGE                                        :percentage
-     DlmsUnit/AMPERE_HOUR                                       :ampere-hour
-     DlmsUnit/ENERGY_PER_VOLUME                                 :energy-per-volume
-     DlmsUnit/CALORIFIC_VALUE                                   :calorific-value
-     DlmsUnit/MOLE_PERCENT                                      :mole-percent
-     DlmsUnit/MASS_DENSITY                                      :mass-density
-     DlmsUnit/PASCAL_SECOND                                     :pascal-second
-     DlmsUnit/SPECIFIC_ENERGY                                   :specific-energy
-     DlmsUnit/SIGNAL_STRENGTH                                   :signal-strength
-     DlmsUnit/RESERVED                                          :reserved
-     DlmsUnit/OTHER_UNIT                                        :other-unit
-     DlmsUnit/COUNT                                             :count
-     ;; not mentioned in IEC 62056, added for m-bus
-     DlmsUnit/CUBIC_METRE_PER_SECOND                            :cubic-meter-per-second
-     DlmsUnit/CUBIC_METRE_PER_MINUTE                            :cubic-meter-per-minute
-     DlmsUnit/KILOGRAM_PER_HOUR                                 :kilogram-per-hour
-     DlmsUnit/CUBIC_FEET                                        :cubic-feet
-     DlmsUnit/US_GALLON                                         :us-gallon
-     DlmsUnit/US_GALLON_PER_MINUTE                              :us-gallon-per-minute
-     DlmsUnit/US_GALLON_PER_HOUR                                :us-gallon-per-hour
-     DlmsUnit/DEGREE_FAHRENHEIT                                 :degree-fahrenheit
-     du)})
+     :unit
+     (condp identical?
+            ?du
+       DlmsUnit/YEAR                                              :year
+       DlmsUnit/MONTH                                             :month
+       DlmsUnit/WEEK                                              :week
+       DlmsUnit/DAY                                               :day
+       DlmsUnit/HOUR                                              :hour
+       DlmsUnit/MIN                                               :min
+       DlmsUnit/SECOND                                            :second
+       DlmsUnit/DEGREE                                            :degree
+       DlmsUnit/DEGREE_CELSIUS                                    :degree-celsius
+       DlmsUnit/CURRENCY                                          :currency
+       DlmsUnit/METRE                                             :meter
+       DlmsUnit/METRE_PER_SECOND                                  :meter-per-second
+       DlmsUnit/CUBIC_METRE                                       :cubic-meter
+       DlmsUnit/CUBIC_METRE_CORRECTED                             :cubic-meter-corrected
+       DlmsUnit/CUBIC_METRE_PER_HOUR                              :cubic-meter-per-hour
+       DlmsUnit/CUBIC_METRE_PER_HOUR_CORRECTED                    :cubic-meter-per-hour-corrected
+       DlmsUnit/CUBIC_METRE_PER_DAY                               :cubic-meter-per-day
+       DlmsUnit/CUBIC_METRE_PER_DAY_CORRECTED                     :cubic-meter-per-day-corrected
+       DlmsUnit/LITRE                                             :litre
+       DlmsUnit/KILOGRAM                                          :kilogram
+       DlmsUnit/NEWTON                                            :newton
+       DlmsUnit/NEWTONMETER                                       :newton-meter
+       DlmsUnit/PASCAL                                            :pascal
+       DlmsUnit/BAR                                               :bar
+       DlmsUnit/JOULE                                             :joule
+       DlmsUnit/JOULE_PER_HOUR                                    :joule-per-hour
+       DlmsUnit/WATT                                              :watt
+       DlmsUnit/VOLT_AMPERE                                       :volt-ampere
+       DlmsUnit/VAR                                               :var
+       DlmsUnit/WATT_HOUR                                         :watt-hour
+       DlmsUnit/VOLT_AMPERE_HOUR                                  :volt-ampere-hour
+       DlmsUnit/VAR_HOUR                                          :var-hour
+       DlmsUnit/AMPERE                                            :ampere
+       DlmsUnit/COULOMB                                           :coulomb
+       DlmsUnit/VOLT                                              :volt
+       DlmsUnit/VOLT_PER_METRE                                    :volt-per-meter
+       DlmsUnit/FARAD                                             :farad
+       DlmsUnit/OHM                                               :ohm
+       DlmsUnit/OHM_METRE                                         :ohm-meter
+       DlmsUnit/WEBER                                             :weber
+       DlmsUnit/TESLA                                             :tesla
+       DlmsUnit/AMPERE_PER_METRE                                  :ampere-per-meter
+       DlmsUnit/HENRY                                             :henry
+       DlmsUnit/HERTZ                                             :hertz
+       DlmsUnit/ACTIVE_ENERGY_METER_CONSTANT_OR_PULSE_VALUE       :active-energy-meter-constant-or-pulse-value
+       DlmsUnit/REACTIVE_ENERGY_METER_CONSTANT_OR_PULSE_VALUE     :reactive-energy-meter-constant-or-puslse-value
+       DlmsUnit/APPARENT_ENERGY_METER_CONSTANT_OR_PULSE_VALUE     :apparent-energy-meter-constant-or-pulse-value
+       DlmsUnit/VOLT_SQUARED_HOURS                                :volt-squared-hours
+       DlmsUnit/AMPERE_SQUARED_HOURS                              :ampere-squared-hours
+       DlmsUnit/KILOGRAM_PER_SECOND                               :kilogram-per-second
+       DlmsUnit/KELVIN                                            :kelvin
+       DlmsUnit/VOLT_SQUARED_HOUR_METER_CONSTANT_OR_PULSE_VALUE   :volt-squared-hour-meter-constant-or-pulse-value
+       DlmsUnit/AMPERE_SQUARED_HOUR_METER_CONSTANT_OR_PULSE_VALUE :ampere-squared-hour-meter-constant-or-pulse-value
+       DlmsUnit/METER_CONSTANT_OR_PULSE_VALUE                     :meter-constant-or-pulse-value
+       DlmsUnit/PERCENTAGE                                        :percentage
+       DlmsUnit/AMPERE_HOUR                                       :ampere-hour
+       DlmsUnit/ENERGY_PER_VOLUME                                 :energy-per-volume
+       DlmsUnit/CALORIFIC_VALUE                                   :calorific-value
+       DlmsUnit/MOLE_PERCENT                                      :mole-percent
+       DlmsUnit/MASS_DENSITY                                      :mass-density
+       DlmsUnit/PASCAL_SECOND                                     :pascal-second
+       DlmsUnit/SPECIFIC_ENERGY                                   :specific-energy
+       DlmsUnit/SIGNAL_STRENGTH                                   :signal-strength
+       DlmsUnit/RESERVED                                          :reserved
+       DlmsUnit/OTHER_UNIT                                        :other-unit
+       DlmsUnit/COUNT                                             :count
+       ;; not mentioned in IEC 62056, added for m-bus
+       DlmsUnit/CUBIC_METRE_PER_SECOND                            :cubic-meter-per-second
+       DlmsUnit/CUBIC_METRE_PER_MINUTE                            :cubic-meter-per-minute
+       DlmsUnit/KILOGRAM_PER_HOUR                                 :kilogram-per-hour
+       DlmsUnit/CUBIC_FEET                                        :cubic-feet
+       DlmsUnit/US_GALLON                                         :us-gallon
+       DlmsUnit/US_GALLON_PER_MINUTE                              :us-gallon-per-minute
+       DlmsUnit/US_GALLON_PER_HOUR                                :us-gallon-per-hour
+       DlmsUnit/DEGREE_FAHRENHEIT                                 :degree-fahrenheit
+       ?du)}))
 
 
 

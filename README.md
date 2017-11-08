@@ -14,7 +14,7 @@ own clojure wrapper.
 
 Then, simply add the following dependency to your project :
 
-    [dvlopt/clombus "0.0.0-alpha1"]
+    [dvlopt/clombus "0.0.0-alpha2"]
 
 ## Usage
 
