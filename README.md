@@ -14,7 +14,7 @@ own clojure wrapper.
 
 Then, simply add the following dependency to your project :
 
-    [dvlopt/clombus "0.0.0-alpha2"]
+[![Clojars Project](https://img.shields.io/clojars/v/dvlopt/clombus.svg)](https://clojars.org/dvlopt/clombus)
 
 ## Usage
 
