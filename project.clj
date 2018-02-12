@@ -19,5 +19,5 @@
                        :plugins      [[venantius/ultra "0.5.1"]
                                       [lein-codox      "0.10.3"]]
                        :codox        {:output-path  "doc/auto"
-                                      :source-paths ["src/clj"]}
+                                      :source-paths ["src"]}
                        :global-vars  {*warn-on-reflection* true}}})

@@ -1,4 +1,4 @@
-# Clombus
+# dvlopt.mbus
 
 Thin clojure wrapper around [JMbus](https://www.openmuc.org/m-bus/) for
 communicating with [Meter-Bus](https://en.wikipedia.org/wiki/Meter-Bus) slave
@@ -14,25 +14,31 @@ own clojure wrapper.
 
 Then, simply add the following dependency to your project :
 
-[![Clojars Project](https://img.shields.io/clojars/v/dvlopt/clombus.svg)](https://clojars.org/dvlopt/clombus)
+[![Clojars
+Project](https://img.shields.io/clojars/v/dvlopt/mbus.svg)](https://clojars.org/dvlopt/mbus)
 
 ## Usage
 
-Read the full [API](https://dvlopt.github.io/doc/clombus/index.html).
+Read the full [API](https://dvlopt.github.io/doc/dvlopt/mbus/).
+
+In short :
 
 ```clj
-(require '[clombus.wired :as mbus.wired])
+(require '[dvlopt.mbus       :as mbus]
+         '[dvlopt.mbus.wired :as mbus.wired])
 
 
-;; create an access point
-(def access-point
-     (mbus.wired/open "/dev/ttyUSB0"
-                      {:baud-rate 2400
-                       :timeout   1000}))
+;; Open a connection on the serial port.
+
+(def connection
+     (::mbus.wired/connection (mbus.wired/open-serial "/dev/ttyUSB0"
+                                                      {::mbus/timeout   1000
+                                                       ::mbus/baud-rate 2400})))
 
 
-;; request user data from slave 0
-(mbus.wired/req-ud2 access-point
+;; Request user data from slave 0
+
+(mbus.wired/req-ud2 connection
                     0)
 ```
 
