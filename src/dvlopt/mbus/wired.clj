@@ -4,11 +4,10 @@
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.spec.alpha      :as s]
-            [dvlopt.mbus             :as mbus]
-            [dvlopt.mbus.interop     :as mbus.interop]
-            [dvlopt.mbus.interop.clj :as mbus.interop.clj]
-            [dvlopt.void             :as void])
+  (:require [clojure.spec.alpha  :as s]
+            [dvlopt.mbus         :as mbus]
+            [dvlopt.mbus.interop :as mbus.interop]
+            [dvlopt.void         :as void])
   (:import (java.io InterruptedIOException
                     IOException)
            (org.openmuc.jmbus MBusConnection
@@ -275,8 +274,8 @@
 
     (req-ud2 [_ primary-address]
       (-try-io
-        {::mbus/variable-data-structure (mbus.interop.clj/variable-data-structure (.read cnx
-                                                                                         primary-address))}))
+        {::mbus/variable-data-structure (mbus.interop/variable-data-structure->clj (.read cnx
+                                                                                          primary-address))}))
 
 
     (reset-application [this]

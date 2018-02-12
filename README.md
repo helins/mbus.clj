@@ -44,6 +44,6 @@ have the relevant hardware to test it.
 
 ## License
 
-Copyright © 2017 Adam Helinski
+Copyright © 2017-2018 Adam Helinski
 
 Distributed under the Mozilla Public License version 2.0.
