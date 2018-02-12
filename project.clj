@@ -1,8 +1,8 @@
 (defproject dvlopt/mbus
             "0.0.0"
 
-  :description  "Clojure library for wired and wireless meter-bus"
-  :url          "https://github.com/dvlopt/clombus"
+  :description  "Meter-Bus clojure library"
+  :url          "https://github.com/dvlopt/mbus"
   :license      {:name "Mozilla Public License version 2.0"
                  :url  "https://www.mozilla.org/en-US/MPL/2.0/"}
   :repl-options {:timeout 180000}
