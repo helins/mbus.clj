@@ -1,6 +1,8 @@
 (ns dvlopt.mbus.interop
 
-  "Utilities and specs for java objects."
+  "Utilities and specs for java objects.
+  
+   Should not be used directly by the user unless needed for some weird reasons."
 
   {:author "Adam Helinski"}
 

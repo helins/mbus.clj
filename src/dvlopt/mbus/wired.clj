@@ -1,6 +1,11 @@
 (ns dvlopt.mbus.wired
 
-  "Wired meter-bus through the serial ports or TCP/IP"
+  "Wired meter-bus through the serial port or TCP/IP.
+
+   All functions are specified by clojure.spec and might throw in case of IO failure.
+  
+   When a timeout in milliseconds is given, IO operations will only block for that amount of time
+   when waiting an answer / confirmation from a slave."
 
   {:author "Adam Helinski"}
 
@@ -8,456 +13,247 @@
             [dvlopt.mbus         :as mbus]
             [dvlopt.mbus.interop :as mbus.interop]
             [dvlopt.void         :as void])
-  (:import (java.io InterruptedIOException
-                    IOException)
-           (org.openmuc.jmbus MBusConnection
+  (:import (org.openmuc.jmbus MBusConnection
                               SecondaryAddress)
-           org.openmuc.jmbus.transportlayer.Builder))
+           org.openmuc.jmbus.transportlayer.Builder
+           org.openmuc.jrxtx.SerialPortTimeoutException))
 
 
 
 
-;;;;;;;;;; Declarations
-
-
-(declare WiredMBus)
-
-
-
-
-;;;;;;;;;; Specs - Wired Meter-bus
+;;;;;;;;;; Specs
 
 
 (s/def ::connection
 
-  #(satisfies? WiredMBus
+  #(satisfies? MBusConnection
                %))
 
 
-(s/def ::status
-
-  (s/keys :req [::mbus/closed?]
-          :opt [::mbus/secondary-address]))
 
 
+;;;;;;;;;; Opening and closing a connection
 
 
-;;;;;;;;;; Specs - Results - Opening a connection
+(s/fdef serial-connection
+
+  :args (s/cat :path           ::mbus/path
+               :serial-options (s/? (s/nilable (s/keys :opt [::mbus/baud-rate
+                                                             ::mbus/timeout-ms]))))
+  :ret  ::connection)
 
 
-(s/def ::result.open
+(defn serial-connection
 
-  (s/or :success ::success.open
-        :failure ::failure.open))
+  "Establishes a Meter-Bus connection on the given serial port."
 
+  (^MBusConnection
+    
+   [path]
 
-(s/def ::success.open
-
-  (s/keys :req [::connection]))
-
-
-(s/def ::failure.open
-
-  (s/keys :req [::blame.open
-                ::mbus/exception]))
+   (serial-connection path
+                      nil))
 
 
-(s/def ::blame.open
+  (^MBusConnection
+    
+   [path serial-options]
 
-  #{:io
-    :unknown})
+   ;; More options such as parity ?
+   ;; MBus standardizes does, doesn't it ?
 
-
-
-
-;;;;;;;;;; Specs - Results - IO
-
-
-(s/def ::result.io
-
-  (s/or :success ::success.io
-        :failure ::failure.io))
-
-
-(s/def ::success.io
-
-  nil?)
-
-(s/def ::failure.io
-
-  (s/keys :req [::blame.io]
-          :opt [::mbus/exception]))
-
-
-(s/def ::blame.io
-
-  #{:io
-    :timeout
-    :unknown})
+   (.build (doto (MBusConnection/newSerialBuilder path)
+             (.setBaudrate (void/obtain ::mbus/baud-rate
+                                        serial-options
+                                        mbus/defaults))
+             (.setTimeout (max 0
+                               (void/obtain ::mbus/timeout-ms
+                                            serial-options
+                                            mbus/defaults)))))))
 
 
 
 
-;;;;;;;;;; Specs - Results - UD2
+(s/fdef tcp-connection
+
+  :args (s/cat :host        ::mbus/host
+               :port        ::mbus/port
+               :tcp-options (s/? (s/nilable (s/keys :opt [::mbus/baud-rate
+                                                          ::mbus/timeout-ms]))))
+  :ret  ::connection)
 
 
-(s/def ::result.req-ud2
+(defn tcp-connection
 
-  (s/or :success ::success.req-ud2
-        :failure ::failure.io))
+  "Establishes a Meter-Bus connection via TCP/IP.
 
+   <!> Experimental."
 
-(s/def ::success.req-ud2
-
-  (s/keys :req [::mbus/variable-data-structure]))
-
-
-
-
-;;;;;;;;;; Private
-
-
-(defmacro ^:private -try-io
-
-  "Helper for WiredMBus functions.
+  (^MBusConnection
   
-   Wraps forms in order to catch timeouts and exceptions."
+   [host port]
 
-  [& body]
-
-  `(try
-     ~@body
-     (catch InterruptedIOException _#
-       {::blame.io :timeout})
-     (catch IOException e#
-       {::blame.io       :io
-        ::mbus/exception e#})
-     (catch Throwable e#
-       {::blame.io       :unknown
-        ::mbus/exception e#})))
+   (tcp-connection host
+                   port
+                   nil))
 
 
+  (^MBusConnection
+    
+   [host port tcp-options]
 
-
-;;;;;;;;;; API - Protocol and implementation
-
-
-(defprotocol WiredMBus
-
-  "Handles with wired M-Bus slaves."
-
-
-  (close [this]
-
-    "Closes the connection.")
-
-
-  (^MBusConnection raw [this]
-
-    "Gets the raw java object, for expert users.")
-
-
-  (req-ud2 [this]
-           [this primary-address]
-
-    "Requests user data from the slave and waits for its answer.")
-
-
-  (reset-application [this]
-                     [this primary-address]
-
-    "Sends an application reset to the requested slave.")
-
-
-  (snd-nke [this]
-           [this primary-address]
-
-    "Sends a SND_NKE message to reset the FCB (frame counter bit).")
-
-
-  (snd-ud [this ba]
-          [this primary-address ba]
-
-    "Sends user data to a slave.")
-
-  (status [this]
-
-    "Gets the current status of the connection.")
-
-
-  #_(select [this secondary-address]
-
-    "Selects a slave using its secondary address (given as a hex string).
-
-     This slave will then be accessible using primary address 0xfd.")
-
-
-  #_(deselect [this]
-
-    "Deselects a slave."))
+   (.build (doto (MBusConnection/newTcpBuilder host
+                                                     port)
+                   (.setTimeout (max 0
+                                     (void/obtain ::mbus/timeout-ms
+                                                  tcp-options
+                                                  mbus/defaults)))))))
 
 
 
 
 (s/fdef close
 
-  :args (s/cat :connection ::connection)
+  :args (s/tuple ::connection)
   :ret  nil?)
 
 
-(s/fdef raw
+(defn close
 
-  :args (s/cat :connection ::connection)
-  :ret  ::mbus.interop/MBusConnection)
+  "Closes the given connection."
+
+  [^MBusConnection connection]
+
+  (.close connection))
+
+
+
+
+;;;;;;;;; Doing IO
 
 
 (s/fdef req-ud2
 
-  :args (s/cat :connection      ::connection
-               :primary-address (s/? ::mbus/primary-address))
-  :ret  ::result.req-ud2)
+  :args (s/cat ::connection      ::connection
+               ::primary-address (s/? ::mbus/primary-address))
+  :ret  ::mbus/variable-data-structure)
+
+
+(defn req-ud2
+
+  "Requests user data from the slave and waits for a variable data structure.
+
+   Returns nil if a timeout was set and is up."
+
+  ([connection]
+
+   (req-ud2 connection
+            (get mbus/defaults
+                 ::mbus/primary-address)))
+
+
+  ([^MBusConnection connection primary-address]
+
+   (try
+     (mbus.interop/variable-data-structure->clj (.read connection
+                                                       primary-address))
+     (catch SerialPortTimeoutException _
+       nil))))
+
+
 
 
 (s/fdef reset-application
 
-  :args (s/cat :connection      ::connection
-               :primary-address (s/? ::primary-address))
-  :ret  ::result.io)
+  :args (s/cat ::connection      ::connection
+               ::primary-address (s/? ::mbus/primary-address))
+  :ret  boolean?)
+
+
+(defn reset-application
+
+  "Sends an application reset to the requested slave.
+
+   Returns false if a timeout was set and is up, true if everything went well."
+
+  ([connection]
+
+   (reset-application connection
+                      (get mbus/defaults
+                           ::mbus/primary-address)))
+
+
+  ([^MBusConnection connection primary-address]
+
+   (try
+     (.resetReadout connection
+                    primary-address)
+     true
+     (catch SerialPortTimeoutException _
+       false))))
+
+
 
 
 (s/fdef snd-nke
 
-  :args (s/cat :connection      ::connection
-               :primary-address (s/? ::mbus/primary-address))
-  :ret  ::result.io)
+  :args (s/cat ::connection      ::connection
+               ::primary-address (s/? ::mbus/primary-address))
+  :ret  boolean?)
 
 
-(s/fdef snd-ud
+(defn snd-nke
 
-  :args (s/cat :connection      ::connection
-               :primary-address (s/? ::mbus/primary-address)
-               :byte-array      bytes?)
-  :ret  ::result.io)
+  "Sends a SND_NKE message to reset the FCB (frame counter bit).
 
+   Returns false if a timeout was set and is up, true if everything went well."
 
-(s/fdef status
+  ([connection]
 
-  :args (s/cat :connection ::connection)
-  :ret  ::status)
+   (reset-application connection
+                      (get mbus/defaults
+                           ::mbus/primary-address)))
 
 
+  ([^MBusConnection connection primary-address]
 
+   (try
+     (.linkReset connection
+                 primary-address)
+     true
+     (catch SerialPortTimeoutException _
+       false))))
 
-(deftype WiredMBusConnection [^MBusConnection    cnx
-                              ^:volatile-mutable -closed?
-                              ^:volatile-mutable -secondary-address]
 
-  WiredMBus
 
 
-    (close [_]
-      (when (not -closed?)
-        (.close cnx)
-        (set! -closed?
-              true))
-      nil)
+(s/fdef send-ud
 
+  :args (s/cat ::connection      ::connection
+               ::primary-address (s/? ::mbus/primary-address))
+  :ret  boolean?)
 
-    (raw [_]
-      cnx)
 
+(defn send-ud
 
-    (req-ud2 [this]
-      (req-ud2 this
-               0xfd))
+  "Sends user data to a slave.
 
+   Returns false if a timeout was set and is up, true if everything went well."
 
-    (req-ud2 [_ primary-address]
-      (-try-io
-        {::mbus/variable-data-structure (mbus.interop/variable-data-structure->clj (.read cnx
-                                                                                          primary-address))}))
+  ([connection ba]
 
+   (send-ud connection
+            ba
+            (get mbus/defaults
+                 ::mbus/primary-address)))
 
-    (reset-application [this]
-      (reset-application this 
-                         0xfd))
 
+  ([^MBusConnection connection ba primary-address]
 
-    (reset-application [_ primary-address]
-      (-try-io
-        (.resetReadout cnx
-                       primary-address)
-        nil))
-
-
-    (snd-nke [this]
-      (snd-nke this
-               0xfd))
-
-
-    (snd-nke [_ primary-address]
-      (-try-io
-        (.linkReset cnx
-                    primary-address)
-        nil))
-
-
-    (snd-ud [this ba]
-      (snd-ud this
-              0xfd))
-
-
-    (snd-ud [_ primary-address ba]
-      (-try-io
-        (.write cnx
-                primary-address
-                ba)
-        nil))
-
-
-    (status [_]
-      (void/assoc-some {::mbus/closed? -closed?}
-                       ::mbus/secondary-address -secondary-address))
-
-
-    #_(select [_ secondary-address]
-
-      ;; java secondary addresses should not be stored as metadata as it makes data no serializable
-      (-try-io
-        (.selectComponent cnx
-                          (if (map? secondary-address)
-                            (::mbus.interop/SecondaryAddress (meta secondary-address))
-                            secondary-address))
-        nil))
-
-
-    #_(deselect [_]
-      (-try-io
-        (.deselectComponent cnx)
-        nil)))
-
-
-
-
-;;;;;;;;;; API - Opening connections
-
-
-(s/fdef -open
-
-  :args (s/cat :builder #(instance? Builder
-                                    %)
-               :opts    (s/keys :opt [::mbus/timeout-ms]))
-  :ret  ::result.open)
-
-
-(defn- -open
-
-  "Helper for opening a Meter-Bus connection.
-  
-   Configures last settings and establishes the connection."
-
-  [^Builder builder opts]
-
-  (.setTimeout builder
-               (max 0
-                    (void/obtain ::mbus/timeout-ms
-                                 opts
-                                 mbus/defaults)))
-  (try
-    {::connection (WiredMBusConnection. (.build builder)
-                                        false
-                                        nil)}
-    (catch IOException e
-      {::mbus/failure   :io
-       ::mbus/exception e})
-    (catch Throwable e
-      {::mbus/failure   :unknown
-       ::mbus/exception e})))
-
-
-
-
-(s/fdef open-serial
-
-  :args (s/cat :path ::mbus/path
-               :opts (s/? (s/keys :opt [::mbus/timeout-ms
-                                        ::mbus/baud-rate])))
-  :ret  ::result.open)
-
-
-(defn open-serial
-
-  "Establishes a Meter-Bus connection on the given serial port."
-
-  ([path]
-
-   (open-serial path
-                nil))
-
-
-  ([path opts]
-
-   ;; TODO more options related to jRXTX
-
-   (let [builder (MBusConnection/newSerialBuilder path)]
-     (.setBaudrate builder
-                   (void/obtain ::mbus/baud-rate
-                                opts
-                                mbus/defaults))
-     (-open builder
-            opts))))
-
-
-
-
-(s/fdef open-tcp
-
-  :args (s/cat :host ::mbus/host
-               :port ::mbus/port
-               :opts (s/? (s/keys :opt [::mbus/timeout-ms])))
-  :ret  ::result.open)
-
-
-(defn open-tcp
-
-  "Establishes a Meter-Bus connection via TCP/IP.
-  
-   <!> Experimental."
-
-  ([host port]
-
-   (open-tcp host
-             port
-             nil))
-
-
-  ([host port opts]
-
-   (-open (MBusConnection/newTcpBuilder host
-                                        port)
-          opts)))
-
-
-
-
-;;;;;;;;;; TODO
-
-;; send long and short messages ?
-
- 
-;; select a device using its secondary address (needs user-friendly address building)
-
-#_(s/fdef select
-
-  :args (s/cat :connection ::connection
-               :secondary-address (s/or :clj  ::mbus/secondary-address
-                                        :java ::mbus.interop/SecondaryAddress))
-  :ret  (s/or :success nil?
-              :error   ::mbus/error))
-
-
-#_(s/fdef deselect
-
-  :args (s/cat :connection ::connection)
-  :ret  (s/or :success nil?
-              :error   ::mbus/error))
+   (try
+     (.write connection
+             primary-address
+             ba)
+     true
+     (catch SerialPortTimeoutException _
+       false))))

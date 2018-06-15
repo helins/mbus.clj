@@ -4,8 +4,21 @@
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.spec.alpha :as s]
-            [dvlopt.ex          :as ex]))
+  (:require [clojure.spec.alpha :as s]))
+
+
+
+
+;;;;;;;;;; Default values
+
+
+(def defaults
+
+  "Defaults values and options used throughout this library."
+
+  {::baud-rate       2400
+   ::primary-address 0xfd
+   ::timeout-ms      0})
 
 
 
@@ -20,25 +33,10 @@
               0)))
 
 
-(s/def ::byte-array
-
-  bytes?)
-
-
-(s/def ::exception
-
-  ::ex/Throwable)
-
-
 (s/def ::string
 
   (s/and string?
          not-empty))
-
-
-(s/def ::exception
-
-  ::ex/Throwable)
 
 
 
@@ -70,11 +68,6 @@
 (s/def ::timeout-ms
 
   ::pos-int)
-
-
-(s/def ::closed?
-
-  boolean?)
 
 
 (s/def ::records
@@ -439,18 +432,4 @@
 
 (s/def ::manufacturer-data
 
-  ::byte-array)
-
-
-
-
-;;;;;;;;;;
-
-
-(def defaults
-
-  "Defaults values."
-
-  {::baud-rate       2400
-   ::primary-address 0xfd
-   ::timeout-ms      0})
+  bytes?)
