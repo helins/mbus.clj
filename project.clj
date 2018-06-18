@@ -1,10 +1,10 @@
 (defproject dvlopt/mbus
-            "1.0.0-beta0"
+            "1.0.0-beta1"
 
   :description  "Meter-Bus clojure library"
   :url          "https://github.com/dvlopt/mbus"
-  :license      {:name "Mozilla Public License version 2.0"
-                 :url  "https://www.mozilla.org/en-US/MPL/2.0/"}
+  :license      {:name "Eclipse Public License"
+                 :url  "http://www.eclipse.org/legal/epl-v10.html"}
   :repl-options {:timeout 180000}
   :jvm-opts     ["-Djava.library.path=/usr/lib/jni"]
   :dependencies [[dvlopt/void       "0.0.0"]
@@ -18,5 +18,4 @@
                        :plugins      [[lein-codox      "0.10.3"]
                                       [venantius/ultra "0.5.1"]]
                        :codox        {:output-path  "doc/auto"
-                                      :source-paths ["src"]}
-                       :global-vars  {*warn-on-reflection* true}}})
+                                      :source-paths ["src"]}}})
