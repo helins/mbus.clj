@@ -10,11 +10,19 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+### Fixed
+
+### Removed
+
+
+
+## [2.0.0-beta0] - 2021-03-25
+
+### Changed
+
 - Namespace keywords under "mbus"
 - Relicensed under MPL 2.0
 - Renamed group id from "dvlopt" to "io.helins"
-
-### Fixed
 
 ### Removed
 
@@ -46,7 +54,8 @@ All notable changes to this project will be documented in this file.
 
 
 
-[Unreleased]: https://github.com/helins/mbus.clj/compare/1.0.0-beta1...HEAD
+[Unreleased]: https://github.com/helins/mbus.clj/compare/2.0.0-beta0...HEAD
+[2.0.0-beta0]: https://github.com/helins/mbus.clj/compare/1.0.0-beta1...2.0.0-beta0
 [1.0.0-beta1]: https://github.com/helins/mbus.clj/compare/1.0.0-beta0...1.0.0-beta1
 [1.0.0-beta0]: https://github.com/helins/mbus.clj/compare/0.0.0...1.0.0-beta0
 [0.0.0]: https://github.com/helins/mbus.clj/tree/0.0.0
