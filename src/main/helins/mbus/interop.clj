@@ -20,22 +20,14 @@
                               DataRecord$Description
                               DeviceType
                               DlmsUnit
-                              MBusConnection
                               SecondaryAddress
                               VariableDataStructure)))
-
-
-
-
-;;;;;;;;;; Declarations
 
 
 (declare data-record$data-value-type->clj
          data-record$description->clj
          data-record$function-field->clj
          dlms-unit->clj)
-
-
 
 
 ;;;;;;;;;; Conversion - Java classes to clojure data structures
@@ -79,10 +71,6 @@
     DataRecord$DataValueType/LONG   :long
     DataRecord$DataValueType/NONE   :none
     DataRecord$DataValueType/STRING :string))
-
-
-
-
 
 
 
@@ -175,10 +163,6 @@
 
 
 
-
-
-
-
 (defn data-record$function-field->clj
 
   [^DataRecord$FunctionField dr$ff]
@@ -189,10 +173,6 @@
     DataRecord$FunctionField/ERROR_VAL :error
     DataRecord$FunctionField/MAX_VAL   :max
     DataRecord$FunctionField/MIN_VAL   :min))
-
-
-
-
 
 
 
@@ -269,9 +249,6 @@
     DeviceType/RESERVED_FOR_SYSTEM_DEVICES_0X3E   :reserved-for-system-devices-0x3E
     DeviceType/RESERVED_FOR_SYSTEM_DEVICES_0X3F   :reserved-for-system-devices-0x3F
     DeviceType/RESERVED                           :reserved))
-
-
-
 
 
 
@@ -362,10 +339,6 @@
 
 
 
-
-
-
-
 (defn secondary-address->clj
 
   [^SecondaryAddress sa]
@@ -374,8 +347,6 @@
    ::mbus/manufacturer-id (.getManufacturerId sa)
    ::mbus/version         (.getVersion        sa)
    ::mbus/device-type     (device-type->clj (.getDeviceType sa))})
-
-
 
 
 

@@ -16,9 +16,7 @@
 
   (:require [helins.mbus         :as mbus]
             [helins.mbus.interop :as mbus.interop])
-  (:import (org.openmuc.jmbus MBusConnection
-                              SecondaryAddress)
-           org.openmuc.jmbus.transportlayer.Builder
+  (:import org.openmuc.jmbus.MBusConnection
            org.openmuc.jrxtx.SerialPortTimeoutException))
 
 
@@ -38,6 +36,16 @@
 
 
 ;;;;;;;;;; Opening and closing a connection
+
+
+(defn close
+
+  "Closes the given connection."
+
+  [^MBusConnection connection]
+
+  (.close connection))
+
 
 
 (defn serial-connection
@@ -68,10 +76,6 @@
 
 
 
-
-
-
-
 (defn tcp-connection
 
   "Establishes a Meter-Bus connection via TCP/IP.
@@ -98,26 +102,7 @@
                                               tcp-options)))))))
 
 
-
-
-
-
-
-(defn close
-
-  "Closes the given connection."
-
-  [^MBusConnection connection]
-
-  (.close connection))
-
-
-
-
 ;;;;;;;;; Doing IO
-
-
-
 
 
 (defn req-ud2
@@ -140,10 +125,6 @@
                                                        primary-address))
      (catch SerialPortTimeoutException _
        nil))))
-
-
-
-
 
 
 
@@ -171,10 +152,6 @@
 
 
 
-
-
-
-
 (defn snd-nke
 
   "Sends a SND_NKE message to reset the FCB (frame counter bit).
@@ -196,10 +173,6 @@
      true
      (catch SerialPortTimeoutException _
        false))))
-
-
-
-
 
 
 
