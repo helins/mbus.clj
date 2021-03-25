@@ -1,4 +1,9 @@
-(ns dvlopt.mbus.wired
+;; This Source Code Form is subject to the terms of the Mozilla Public
+;; License, v. 2.0. If a copy of the MPL was not distributed with this
+;; file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+
+(ns helins.mbus.wired
 
   "Wired meter-bus through the serial port or TCP/IP.
 
@@ -10,15 +15,28 @@
   {:author "Adam Helinski"}
 
   (:require [clojure.spec.alpha  :as s]
-            [dvlopt.mbus         :as mbus]
-            [dvlopt.mbus.interop :as mbus.interop]
-            [dvlopt.void         :as void])
+            [helins.mbus         :as mbus]
+            [helins.mbus.interop :as mbus.interop]
+            [helins.void         :as void])
   (:import (org.openmuc.jmbus MBusConnection
                               SecondaryAddress)
            org.openmuc.jmbus.transportlayer.Builder
            org.openmuc.jrxtx.SerialPortTimeoutException))
 
 
+;;;;;;;;;; Private helpers
+
+
+(defn- -obtain
+
+  ;; Retrieves value or rely on default one.
+
+  [k hmap]
+
+  (or (get hmap
+           k)
+      (get mbus/defaults
+           k)))
 
 
 ;;;;;;;;;; Specs
@@ -63,13 +81,11 @@
    ;; MBus standardizes does, doesn't it ?
 
    (.build (doto (MBusConnection/newSerialBuilder path)
-             (.setBaudrate (void/obtain ::mbus/baud-rate
-                                        serial-options
-                                        mbus/defaults))
+             (.setBaudrate (-obtain ::mbus/baud-rate
+                                    serial-options))
              (.setTimeout (max 0
-                               (void/obtain ::mbus/timeout-ms
-                                            serial-options
-                                            mbus/defaults)))))))
+                               (-obtain ::mbus/timeout-ms
+                                        serial-options)))))))
 
 
 
@@ -105,9 +121,8 @@
    (.build (doto (MBusConnection/newTcpBuilder host
                                                      port)
                    (.setTimeout (max 0
-                                     (void/obtain ::mbus/timeout-ms
-                                                  tcp-options
-                                                  mbus/defaults)))))))
+                                     (-obtain ::mbus/timeout-ms
+                                              tcp-options)))))))
 
 
 

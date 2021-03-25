@@ -1,4 +1,9 @@
-(ns dvlopt.mbus.interop
+;; This Source Code Form is subject to the terms of the Mozilla Public
+;; License, v. 2.0. If a copy of the MPL was not distributed with this
+;; file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+
+(ns helins.mbus.interop
 
   "Utilities and specs for java objects.
   
@@ -8,8 +13,8 @@
 
   (:require [clojure.spec.alpha     :as s]
             [clojure.spec.gen.alpha :as gen]
-            [dvlopt.mbus            :as mbus]
-            [dvlopt.void            :as void])
+            [helins.mbus            :as mbus]
+            [helins.void            :as void])
   (:import java.util.Date
            (org.openmuc.jmbus DataRecord
                               DataRecord$DataValueType
@@ -134,25 +139,25 @@
 
   [^DataRecord dr]
 
-  (void/assoc-some (let [value-type (data-record$data-value-type->clj (.getDataValueType dr))]
-                     (assoc (merge {::mbus/value-type     value-type
-                                    ::mbus/function-field (data-record$function-field->clj (.getFunctionField dr))
-                                    ::mbus/storage-number (.getStorageNumber dr)
-                                    ::mbus/description    (data-record$description->clj (.getDescription dr))}
-                                   (some-> (.getUnit dr)
-                                           dlms-unit->clj))
-                            ::mbus/value
-                            (let [value (.getDataValue dr)]
-                              (if (identical? value-type
-                                              :date)
-                                (.getTime ^Date value)
-                                value))))
-                   ::mbus/exp10          (let [exp10 (.getMultiplierExponent dr)]
-                                           (when (pos? exp10)
-                                             exp10))
-                   ::mbus/ud-description (when (identical? (.getDescription dr)
-                                                           DataRecord$Description/USER_DEFINED)
-                                           (.getUserDefinedDescription dr))))
+  (void/assoc (let [value-type (data-record$data-value-type->clj (.getDataValueType dr))]
+                (assoc (merge {::mbus/value-type     value-type
+                               ::mbus/function-field (data-record$function-field->clj (.getFunctionField dr))
+                               ::mbus/storage-number (.getStorageNumber dr)
+                               ::mbus/description    (data-record$description->clj (.getDescription dr))}
+                              (some-> (.getUnit dr)
+                                      dlms-unit->clj))
+                       ::mbus/value
+                       (let [value (.getDataValue dr)]
+                         (if (identical? value-type
+                                         :date)
+                           (.getTime ^Date value)
+                           value))))
+              ::mbus/exp10          (let [exp10 (.getMultiplierExponent dr)]
+                                      (when (pos? exp10)
+                                        exp10))
+              ::mbus/ud-description (when (identical? (.getDescription dr)
+                                                      DataRecord$Description/USER_DEFINED)
+                                      (.getUserDefinedDescription dr))))
 
 
 (s/fdef data-record$data-value-type->clj
@@ -497,10 +502,10 @@
 
   [^VariableDataStructure vds]
 
-  (void/assoc-some {::mbus/records           (map data-record->clj
-                                                  (.getDataRecords vds))
-                    ::mbus/more-records?     (.moreRecordsFollow vds)
-                    ::mbus/status            (.getStatus           vds)
-                    ::mbus/access-number     (.getAccessNumber     vds)
-                    ::mbus/secondary-address (secondary-address->clj (.getSecondaryAddress vds))}
-                   ::mbus/manufacturer-data (not-empty (.getManufacturerData vds))))
+  (void/assoc {::mbus/records           (map data-record->clj
+                                             (.getDataRecords vds))
+               ::mbus/more-records?     (.moreRecordsFollow vds)
+               ::mbus/status            (.getStatus           vds)
+               ::mbus/access-number     (.getAccessNumber     vds)
+               ::mbus/secondary-address (secondary-address->clj (.getSecondaryAddress vds))}
+              ::mbus/manufacturer-data (not-empty (.getManufacturerData vds))))
