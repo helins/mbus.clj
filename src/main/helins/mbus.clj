@@ -13,10 +13,10 @@
 ;;;;;;;;;; Default values
 
 
-(def defaults
+(def default+
 
   "Defaults values and options used throughout this library."
 
-  {::baud-rate       2400
-   ::primary-address 0xfd
-   ::timeout-ms      0})
+  {:mbus/baud-rate       2400
+   :mbus/primary-address 0xfd
+   :mbus/timeout-ms      0})

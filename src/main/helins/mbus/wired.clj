@@ -31,7 +31,7 @@
 
   (or (get hmap
            k)
-      (get mbus/defaults
+      (get mbus/default+
            k)))
 
 
@@ -68,10 +68,10 @@
    ;; MBus standardizes does, doesn't it ?
 
    (.build (doto (MBusConnection/newSerialBuilder path)
-             (.setBaudrate (-obtain ::mbus/baud-rate
+             (.setBaudrate (-obtain :mbus/baud-rate
                                     serial-options))
              (.setTimeout (max 0
-                               (-obtain ::mbus/timeout-ms
+                               (-obtain :mbus/timeout-ms
                                         serial-options)))))))
 
 
@@ -98,7 +98,7 @@
    (.build (doto (MBusConnection/newTcpBuilder host
                                                      port)
                    (.setTimeout (max 0
-                                     (-obtain ::mbus/timeout-ms
+                                     (-obtain :mbus/timeout-ms
                                               tcp-options)))))))
 
 
@@ -114,8 +114,8 @@
   ([connection]
 
    (req-ud2 connection
-            (get mbus/defaults
-                 ::mbus/primary-address)))
+            (get mbus/default+
+                 :mbus/primary-address)))
 
 
   ([^MBusConnection connection primary-address]
@@ -137,8 +137,8 @@
   ([connection]
 
    (reset-application connection
-                      (get mbus/defaults
-                           ::mbus/primary-address)))
+                      (get mbus/default+
+                           :mbus/primary-address)))
 
 
   ([^MBusConnection connection primary-address]
@@ -161,8 +161,8 @@
   ([connection]
 
    (reset-application connection
-                      (get mbus/defaults
-                           ::mbus/primary-address)))
+                      (get mbus/default+
+                           :mbus/primary-address)))
 
 
   ([^MBusConnection connection primary-address]
@@ -186,8 +186,8 @@
 
    (send-ud connection
             ba
-            (get mbus/defaults
-                 ::mbus/primary-address)))
+            (get mbus/default+
+                 :mbus/primary-address)))
 
 
   ([^MBusConnection connection ba primary-address]

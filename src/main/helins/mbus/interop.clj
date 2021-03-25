@@ -38,24 +38,24 @@
   [^DataRecord dr]
 
   (void/assoc (let [value-type (data-record$data-value-type->clj (.getDataValueType dr))]
-                (assoc (merge {::mbus/value-type     value-type
-                               ::mbus/function-field (data-record$function-field->clj (.getFunctionField dr))
-                               ::mbus/storage-number (.getStorageNumber dr)
-                               ::mbus/description    (data-record$description->clj (.getDescription dr))}
+                (assoc (merge {:mbus/value-type     value-type
+                               :mbus/function-field (data-record$function-field->clj (.getFunctionField dr))
+                               :mbus/storage-number (.getStorageNumber dr)
+                               :mbus/description    (data-record$description->clj (.getDescription dr))}
                               (some-> (.getUnit dr)
                                       dlms-unit->clj))
-                       ::mbus/value
+                       :mbus/value
                        (let [value (.getDataValue dr)]
                          (if (identical? value-type
                                          :date)
                            (.getTime ^Date value)
                            value))))
-              ::mbus/exp10          (let [exp10 (.getMultiplierExponent dr)]
-                                      (when (pos? exp10)
-                                        exp10))
-              ::mbus/ud-description (when (identical? (.getDescription dr)
-                                                      DataRecord$Description/USER_DEFINED)
-                                      (.getUserDefinedDescription dr))))
+              :mbus/exp10          (let [exp10 (.getMultiplierExponent dr)]
+                                     (when (pos? exp10)
+                                       exp10))
+              :mbus/ud-description (when (identical? (.getDescription dr)
+                                                     DataRecord$Description/USER_DEFINED)
+                                     (.getUserDefinedDescription dr))))
 
 
 
@@ -256,10 +256,10 @@
 
   [^DlmsUnit du]
 
-  {::mbus/unit-string
+  {:mbus/unit-string
    (.getUnit du)
 
-   ::mbus/unit
+   :mbus/unit
    (condp identical?
           du
      DlmsUnit/ACTIVE_ENERGY_METER_CONSTANT_OR_PULSE_VALUE       :active-energy-meter-constant-or-pulse-value
@@ -343,10 +343,10 @@
 
   [^SecondaryAddress sa]
 
-  {::mbus/device-id       (.getDeviceId       sa)
-   ::mbus/manufacturer-id (.getManufacturerId sa)
-   ::mbus/version         (.getVersion        sa)
-   ::mbus/device-type     (device-type->clj (.getDeviceType sa))})
+  {:mbus/device-id       (.getDeviceId       sa)
+   :mbus/manufacturer-id (.getManufacturerId sa)
+   :mbus/version         (.getVersion        sa)
+   :mbus/device-type     (device-type->clj (.getDeviceType sa))})
 
 
 
@@ -354,10 +354,10 @@
 
   [^VariableDataStructure vds]
 
-  (void/assoc {::mbus/records           (map data-record->clj
-                                             (.getDataRecords vds))
-               ::mbus/more-records?     (.moreRecordsFollow vds)
-               ::mbus/status            (.getStatus           vds)
-               ::mbus/access-number     (.getAccessNumber     vds)
-               ::mbus/secondary-address (secondary-address->clj (.getSecondaryAddress vds))}
-              ::mbus/manufacturer-data (not-empty (.getManufacturerData vds))))
+  (void/assoc {:mbus/records           (map data-record->clj
+                                                 (.getDataRecords vds))
+               :mbus/more-records?     (.moreRecordsFollow vds)
+               :mbus/status            (.getStatus           vds)
+               :mbus/access-number     (.getAccessNumber     vds)
+               :mbus/secondary-address (secondary-address->clj (.getSecondaryAddress vds))}
+              :mbus/manufacturer-data (not-empty (.getManufacturerData vds))))
