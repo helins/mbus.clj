@@ -12,6 +12,11 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+### Removed
+
+- Specs (as they were mostly useless)
+
+
 
 ## [1.0.0-beta1] - 2018-06-18
 

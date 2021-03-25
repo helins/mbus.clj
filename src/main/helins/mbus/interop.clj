@@ -11,10 +11,8 @@
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.spec.alpha     :as s]
-            [clojure.spec.gen.alpha :as gen]
-            [helins.mbus            :as mbus]
-            [helins.void            :as void])
+  (:require [helins.mbus :as mbus]
+            [helins.void :as void])
   (:import java.util.Date
            (org.openmuc.jmbus DataRecord
                               DataRecord$DataValueType
@@ -40,99 +38,7 @@
 
 
 
-;;;;;;;;;; Specs - Helper functions
-
-
-(defn spec-enum
-
-  "Creates a spec with its generator for a java enum."
-
-  [klass values]
-
-  (s/with-gen #(instance? klass
-                          %)
-              (fn gen []
-                (gen/fmap (fn value [i]
-                            (nth values
-                                 i))
-                          (s/gen (s/int-in 0
-                                           (count values)))))))
-
-
-
-
-;;;;;;;;;; Specs - Java Classes
-
-
-
-(s/def ::DataRecord
-
-  #(instance? DataRecord
-              %))
-
-
-(s/def ::DataRecord$DataValueType
-
-  (spec-enum DataRecord$DataValueType
-             (DataRecord$DataValueType/values)))
-
-
-(s/def ::DataRecord$FunctionField
-
-  (spec-enum DataRecord$FunctionField
-             (DataRecord$FunctionField/values)))
-
-
-(s/def ::DataRecord$Description
-
-  (spec-enum DataRecord$Description
-             (DataRecord$Description/values)))
-
-
-(s/def ::DeviceType
-
-  (spec-enum DeviceType
-             (DeviceType/values)))
-
-
-(s/def ::DlmsUnit
-
-  (spec-enum DlmsUnit
-             (DlmsUnit/values)))
-
-
-(s/def ::MBusConnection
-
-  #(instance? MBusConnection
-              %))
-
-
-(s/def ::SecondaryAddress
-
-  (s/with-gen #(instance? SecondaryAddress
-                          %)
-              (fn gen []
-                (gen/fmap (fn make [^bytes ba]
-                            (SecondaryAddress/newFromLongHeader ba
-                                                                0))
-                          (s/gen bytes?)))))
-
-
-(s/def ::VariableDataStructure
-
-  #(instance? VariableDataStructure
-              %))
-
-
-
-
 ;;;;;;;;;; Conversion - Java classes to clojure data structures
-
-
-(s/fdef data-record->clj
-
-  :args (s/cat :dr ::DataRecord)
-  :ret ::mbus/record)
 
 
 (defn data-record->clj
@@ -160,11 +66,6 @@
                                       (.getUserDefinedDescription dr))))
 
 
-(s/fdef data-record$data-value-type->clj
-
-  :args (s/cat :dr$dvt ::DataRecord$DataValueType)
-  :ret ::mbus/value-type)
-
 
 (defn data-record$data-value-type->clj
 
@@ -182,10 +83,7 @@
 
 
 
-(s/fdef data-record$description->clj
 
-  :args (s/cat :dr$d ::DataRecord$Description)
-  :ret  ::mbus/description)
 
 
 (defn data-record$description->clj
@@ -278,10 +176,7 @@
 
 
 
-(s/fdef data-record$function-field->clj
 
-  :args (s/cat :dr$ff ::DataRecord$FunctionField)
-  :ret  ::mbus/function-field)
 
 
 (defn data-record$function-field->clj
@@ -298,10 +193,7 @@
 
 
 
-(s/fdef device-type->clj
 
-  :args (s/cat :dt ::DeviceType)
-  :ret  ::mbus/device-type)
 
 
 (defn device-type->clj
@@ -380,10 +272,7 @@
 
 
 
-(s/fdef dlms-unit->clj
 
-  :args (s/cat :du ::DlmsUnit)
-  :ret  ::mbus/dlms-unit)
 
 
 (defn dlms-unit->clj
@@ -474,10 +363,7 @@
 
 
 
-(s/fdef secondary-address->clj
 
-  :args (s/cat :sa ::SecondaryAddress)
-  :ret  ::mbus/secondary-address)
 
 
 (defn secondary-address->clj
@@ -491,11 +377,6 @@
 
 
 
-
-(s/fdef variable-data-structure->clj
-
-  :args (s/cat :vds ::VariableDataStructure)
-  :ret  ::mbus/variable-data-structure)
 
 
 (defn variable-data-structure->clj

@@ -14,10 +14,8 @@
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.spec.alpha  :as s]
-            [helins.mbus         :as mbus]
-            [helins.mbus.interop :as mbus.interop]
-            [helins.void         :as void])
+  (:require [helins.mbus         :as mbus]
+            [helins.mbus.interop :as mbus.interop])
   (:import (org.openmuc.jmbus MBusConnection
                               SecondaryAddress)
            org.openmuc.jmbus.transportlayer.Builder
@@ -39,26 +37,7 @@
            k)))
 
 
-;;;;;;;;;; Specs
-
-
-(s/def ::connection
-
-  #(satisfies? MBusConnection
-               %))
-
-
-
-
 ;;;;;;;;;; Opening and closing a connection
-
-
-(s/fdef serial-connection
-
-  :args (s/cat :path           ::mbus/path
-               :serial-options (s/? (s/nilable (s/keys :opt [::mbus/baud-rate
-                                                             ::mbus/timeout-ms]))))
-  :ret  ::connection)
 
 
 (defn serial-connection
@@ -90,13 +69,7 @@
 
 
 
-(s/fdef tcp-connection
 
-  :args (s/cat :host        ::mbus/host
-               :port        ::mbus/port
-               :tcp-options (s/? (s/nilable (s/keys :opt [::mbus/baud-rate
-                                                          ::mbus/timeout-ms]))))
-  :ret  ::connection)
 
 
 (defn tcp-connection
@@ -127,10 +100,7 @@
 
 
 
-(s/fdef close
 
-  :args (s/tuple ::connection)
-  :ret  nil?)
 
 
 (defn close
@@ -147,11 +117,7 @@
 ;;;;;;;;; Doing IO
 
 
-(s/fdef req-ud2
 
-  :args (s/cat ::connection      ::connection
-               ::primary-address (s/? ::mbus/primary-address))
-  :ret  ::mbus/variable-data-structure)
 
 
 (defn req-ud2
@@ -178,11 +144,7 @@
 
 
 
-(s/fdef reset-application
 
-  :args (s/cat ::connection      ::connection
-               ::primary-address (s/? ::mbus/primary-address))
-  :ret  boolean?)
 
 
 (defn reset-application
@@ -210,11 +172,7 @@
 
 
 
-(s/fdef snd-nke
 
-  :args (s/cat ::connection      ::connection
-               ::primary-address (s/? ::mbus/primary-address))
-  :ret  boolean?)
 
 
 (defn snd-nke
@@ -242,11 +200,7 @@
 
 
 
-(s/fdef send-ud
 
-  :args (s/cat ::connection      ::connection
-               ::primary-address (s/? ::mbus/primary-address))
-  :ret  boolean?)
 
 
 (defn send-ud
